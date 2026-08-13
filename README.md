@@ -15,7 +15,6 @@ This project is separated into two distinct environments:
 - Language: JavaScript (ES6+)
 - Styling: Tailwind CSS (with Glassmorphism design system)
 - Animations: Framer Motion
-- Icons: Lucide React & React Icons
 
 ### Backend
 - Runtime: Node.js
@@ -27,94 +26,15 @@ This project is separated into two distinct environments:
 
 ## Key Features
 
-- Dynamic Content Management: Manage Projects, Skills, Experience, and Profile details through a secure Admin Dashboard.
-- Secure Authentication: HTTP-only cookie-based JWT authentication for the administrator.
-- High Performance: Fully optimized with next/dynamic lazy loading, Icon tree-shaking, and Image optimization.
-- Interactive UI: Fluid transitions and spring animations using Framer Motion.
-- Responsive Design: Mobile-first approach scaling cleanly to desktop viewports.
-- Contact System: Integrated contact form that saves messages directly to the database for admin review.
+- **Dynamic Content Management:** Manage Projects, Skills, Experience, and Profile details through a custom, secure Admin Dashboard without needing to touch code.
+- **Secure Authentication:** HTTP-only cookie-based JWT authentication protects the administrator routes.
+- **High Performance:** Fully optimized with dynamic lazy loading for large components, tree-shaking for icons, and advanced Image optimization for maximum Lighthouse scores.
+- **Interactive UI:** Fluid transitions, staggered reveals, and spring-based micro-animations built with Framer Motion.
+- **Responsive Design:** Mobile-first approach scaling cleanly and natively to tablet and desktop viewports.
+- **Integrated Contact System:** A direct contact form that saves messages securely to the database for admin review.
 
-## Prerequisites
+## Overview
 
-Before setting up the project locally, ensure you have the following installed:
-- Node.js (v18.0.0 or higher)
-- MongoDB (running locally or a MongoDB Atlas URI)
-- Cloudinary Account (for image hosting)
+This repository serves as a showcase of my ability to architect and build complete full-stack applications from scratch. It demonstrates proficiency in modern React patterns (Next.js App Router), secure backend API design, database schema modeling, and advanced CSS/animation techniques.
 
-## Installation & Setup
-
-### 1. Clone the repository
-```bash
-git clone https://github.com/Krushnakant1979/Personal-Portfolio.git
-cd Personal-Portfolio
-```
-
-### 2. Install dependencies
-Install dependencies for both the frontend and backend applications.
-
-```bash
-# Install Client Dependencies
-cd client
-npm install
-
-# Install Server Dependencies
-cd ../server
-npm install
-```
-
-### 3. Environment Configuration
-
-You will need to create two environment files.
-
-**Backend Configuration (server/.env)**
-Create a `.env` file in the `server` directory:
-```env
-PORT=5000
-MONGODB_URI=mongodb://localhost:27017/krushna_portfolio
-JWT_SECRET=your_secure_jwt_secret_key
-CLIENT_URL=http://localhost:3000
-
-# Cloudinary Setup (Required for project images)
-CLOUDINARY_CLOUD_NAME=your_cloud_name
-CLOUDINARY_API_KEY=your_api_key
-CLOUDINARY_API_SECRET=your_api_secret
-```
-
-**Frontend Configuration (client/.env.local)**
-Create a `.env.local` file in the `client` directory:
-```env
-NEXT_PUBLIC_API_URL=http://localhost:5000
-```
-
-### 4. Database Seeding
-To populate the database with your initial admin account and default settings, run the seed script:
-
-```bash
-cd server
-node src/seed/index.js
-```
-Note: The default credentials created by the seed script are `krushnakantrutele1979@gmail.com` and password `admin123`. Please change this password immediately in production.
-
-### 5. Running the Application
-
-Open two terminal instances from the root directory.
-
-**Terminal 1 (Backend API)**
-```bash
-cd server
-npm run dev
-```
-
-**Terminal 2 (Frontend Client)**
-```bash
-cd client
-npm run dev
-```
-
-The application will be accessible at `http://localhost:3000`.
-
-## Deployment Recommendations
-
-- **Frontend:** Vercel is recommended for the Next.js client for zero-configuration deployments. Ensure you set the `NEXT_PUBLIC_API_URL` environment variable.
-- **Backend:** Deploy the Express API to a VPS (e.g., DigitalOcean, AWS EC2, or Hostinger). Persistent storage is required to retain uploaded Resume PDFs. Ensure CORS is configured properly via the `CLIENT_URL` environment variable.
-- **Database:** MongoDB Atlas is recommended for a managed, cloud-hosted database.
+*(Note: This repository is a showcase of my personal work. Setup instructions and environment variables have been intentionally omitted to protect proprietary configurations.)*
