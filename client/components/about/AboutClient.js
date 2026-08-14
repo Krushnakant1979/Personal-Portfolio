@@ -2,6 +2,7 @@
 import { motion } from 'framer-motion';
 import Button from '@/components/ui/Button';
 import { Download, Zap, Heart, Target, Coffee } from 'lucide-react';
+import { handleFileDownload } from '@/utils/downloadFile';
 
 const fadeUp = {
   hidden: { opacity: 0, y: 30 },
@@ -119,7 +120,13 @@ export default function AboutClient({ profile }) {
           <h3 className="text-xl font-bold text-white mb-1">Interested in working together?</h3>
           <p className="text-gray-400 text-sm">Download my resume to learn more about my experience and skills.</p>
         </div>
-        <Button href={profile?.resume || '/resume.pdf'} target="_blank" rel="noopener noreferrer" className="shrink-0">
+        <Button 
+          href={profile?.resume || '/resume.pdf'} 
+          onClick={(e) => handleFileDownload(e, profile?.resume || '/resume.pdf', 'Krushnakant_Rutele_Resume.pdf')}
+          target="_blank" 
+          rel="noopener noreferrer" 
+          className="shrink-0 cursor-pointer"
+        >
           <Download className="mr-2" size={18} />
           Download Resume
         </Button>

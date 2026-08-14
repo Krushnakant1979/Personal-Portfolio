@@ -10,6 +10,33 @@ import { FaGithub, FaLinkedin, FaInstagram } from 'react-icons/fa';
 const HeroSection = ({ initialProfile = null }) => {
   const profile = initialProfile;
 
+  const handleDownload = async (e, url) => {
+    if (!url) return;
+    if (url.includes('cloudinary')) {
+      e.preventDefault();
+      try {
+        // Fetch the file as a blob to force download
+        const response = await fetch(url);
+        const blob = await response.blob();
+        const blobUrl = window.URL.createObjectURL(blob);
+        
+        // Create a temporary anchor element and trigger download
+        const a = document.createElement('a');
+        a.href = blobUrl;
+        a.download = 'Krushnakant_Rutele_Resume.pdf';
+        document.body.appendChild(a);
+        a.click();
+        
+        // Clean up
+        window.URL.revokeObjectURL(blobUrl);
+        document.body.removeChild(a);
+      } catch (error) {
+        console.error('Download failed, opening in new tab instead:', error);
+        window.open(url, '_blank'); // Fallback to opening in new tab
+      }
+    }
+  };
+
   return (
     <section className="relative min-h-screen flex items-center overflow-hidden bg-[#050505] -mt-16 sm:-mt-20 pt-16 sm:pt-20">
       <div className="max-w-[1400px] mx-auto px-6 sm:px-12 w-full h-full relative">
@@ -218,9 +245,10 @@ const HeroSection = ({ initialProfile = null }) => {
                
                <motion.a
                  href={profile?.resume || "/resume.pdf"}
+                 onClick={(e) => handleDownload(e, profile?.resume || "/resume.pdf")}
                  target="_blank"
                  rel="noopener noreferrer"
-                 className="inline-flex items-center text-primary font-medium border-b border-primary/40 pb-1 hover:border-primary transition-colors group text-sm w-max"
+                 className="inline-flex items-center text-primary font-medium border-b border-primary/40 pb-1 hover:border-primary transition-colors group text-sm w-max cursor-pointer"
                  initial={{ opacity: 0 }}
                  animate={{ opacity: 1 }}
                  transition={{ duration: 0.6, delay: 1.2 }}
