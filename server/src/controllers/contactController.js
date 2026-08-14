@@ -1,11 +1,26 @@
-const Contact = require('../models/Contact');
+const { db, FieldValue } = require('../config/db');
+
+// Helper to format Firestore docs
+const formatDoc = (doc) => ({ _id: doc.id, ...doc.data() });
 
 // @desc    Get all contact submissions
 // @route   GET /api/contact
 // @access  Private
 const getContacts = async (req, res, next) => {
   try {
-    const contacts = await Contact.find({}).sort({ createdAt: -1 });
+    const snapshot = await db.collection('contacts').get();
+    let contacts = [];
+    snapshot.forEach(doc => {
+      contacts.push(formatDoc(doc));
+    });
+    
+    // Sort by createdAt descending
+    contacts.sort((a, b) => {
+      const timeA = a.createdAt ? (a.createdAt.toMillis ? a.createdAt.toMillis() : new Date(a.createdAt).getTime()) : 0;
+      const timeB = b.createdAt ? (b.createdAt.toMillis ? b.createdAt.toMillis() : new Date(b.createdAt).getTime()) : 0;
+      return timeB - timeA;
+    });
+
     res.json(contacts);
   } catch (error) {
     next(error);
@@ -24,15 +39,20 @@ const createContact = async (req, res, next) => {
       return res.status(400).json({ message: 'Spam detected' });
     }
 
-    const contact = new Contact({
+    const newContact = {
       name,
       email,
       subject,
       message,
-    });
-
-    const createdContact = await contact.save();
-    res.status(201).json(createdContact);
+      status: 'unread',
+      createdAt: FieldValue.serverTimestamp(),
+      updatedAt: FieldValue.serverTimestamp()
+    };
+    
+    const docRef = await db.collection('contacts').add(newContact);
+    const doc = await docRef.get();
+    
+    res.status(201).json(formatDoc(doc));
   } catch (error) {
     next(error);
   }
@@ -44,12 +64,18 @@ const createContact = async (req, res, next) => {
 const updateContactStatus = async (req, res, next) => {
   try {
     const { status } = req.body;
-    const contact = await Contact.findById(req.params.id);
-
-    if (contact) {
-      contact.status = status || contact.status;
-      const updatedContact = await contact.save();
-      res.json(updatedContact);
+    const docRef = db.collection('contacts').doc(req.params.id);
+    const doc = await docRef.get();
+    
+    if (doc.exists) {
+      const updates = {
+        updatedAt: FieldValue.serverTimestamp()
+      };
+      if (status) updates.status = status;
+      
+      await docRef.update(updates);
+      const updatedDoc = await docRef.get();
+      res.json(formatDoc(updatedDoc));
     } else {
       res.status(404);
       throw new Error('Contact submission not found');
@@ -64,9 +90,11 @@ const updateContactStatus = async (req, res, next) => {
 // @access  Private
 const deleteContact = async (req, res, next) => {
   try {
-    const contact = await Contact.findById(req.params.id);
-    if (contact) {
-      await contact.deleteOne();
+    const docRef = db.collection('contacts').doc(req.params.id);
+    const doc = await docRef.get();
+    
+    if (doc.exists) {
+      await docRef.delete();
       res.json({ message: 'Message deleted' });
     } else {
       res.status(404);

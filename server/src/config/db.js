@@ -1,13 +1,20 @@
-const mongoose = require('mongoose');
+const { initializeApp, cert } = require('firebase-admin/app');
+const { getFirestore, FieldValue } = require('firebase-admin/firestore');
+const path = require('path');
 
-const connectDB = async () => {
+const connectDB = () => {
   try {
-    const conn = await mongoose.connect(process.env.MONGODB_URI);
-    console.log(`MongoDB Connected: ${conn.connection.host}`);
+    const serviceAccountPath = path.resolve(__dirname, 'firebaseServiceAccount.json');
+    const app = initializeApp({
+      credential: cert(require(serviceAccountPath))
+    });
+    console.log('Firebase Firestore Connected Successfully');
+    return getFirestore(app);
   } catch (error) {
-    console.error(`Error: ${error.message}`);
+    console.error(`Firebase Connection Error: ${error.message}`);
     process.exit(1);
   }
 };
 
-module.exports = connectDB;
+const db = connectDB();
+module.exports = { db, FieldValue };

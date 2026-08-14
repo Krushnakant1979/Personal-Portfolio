@@ -6,14 +6,11 @@ const morgan = require('morgan');
 const dotenv = require('dotenv');
 const rateLimit = require('express-rate-limit');
 
-const connectDB = require('./config/db');
+require('./config/db');
 const { errorHandler, notFound } = require('./middleware/errorHandler');
 
 // Load env vars
 dotenv.config();
-
-// Connect to database
-connectDB();
 
 // Security Checks for Production
 if (process.env.NODE_ENV === 'production') {

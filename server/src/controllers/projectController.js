@@ -1,13 +1,32 @@
-const Project = require('../models/Project');
+const { db, FieldValue } = require('../config/db');
+
+// Helper to format Firestore docs
+const formatDoc = (doc) => ({ _id: doc.id, ...doc.data() });
 
 // @desc    Get all projects
 // @route   GET /api/projects
 // @access  Public
 const getProjects = async (req, res, next) => {
   try {
-    const projects = await Project.find({
-      $or: [{ status: 'published' }, { status: { $exists: false } }]
-    }).sort({ displayOrder: 1, createdAt: -1 });
+    const snapshot = await db.collection('projects').get();
+    let projects = [];
+    snapshot.forEach(doc => {
+      const data = doc.data();
+      if (data.status !== 'draft') {
+        projects.push(formatDoc(doc));
+      }
+    });
+    
+    // Sort by displayOrder ascending, then createdAt descending
+    projects.sort((a, b) => {
+      if (a.displayOrder !== b.displayOrder) {
+        return (a.displayOrder || 0) - (b.displayOrder || 0);
+      }
+      const timeA = a.createdAt ? (a.createdAt.toMillis ? a.createdAt.toMillis() : new Date(a.createdAt).getTime()) : 0;
+      const timeB = b.createdAt ? (b.createdAt.toMillis ? b.createdAt.toMillis() : new Date(b.createdAt).getTime()) : 0;
+      return timeB - timeA;
+    });
+
     res.json(projects);
   } catch (error) {
     next(error);
@@ -19,7 +38,21 @@ const getProjects = async (req, res, next) => {
 // @access  Private
 const getAdminProjects = async (req, res, next) => {
   try {
-    const projects = await Project.find({}).sort({ displayOrder: 1, createdAt: -1 });
+    const snapshot = await db.collection('projects').get();
+    let projects = [];
+    snapshot.forEach(doc => {
+      projects.push(formatDoc(doc));
+    });
+    
+    projects.sort((a, b) => {
+      if (a.displayOrder !== b.displayOrder) {
+        return (a.displayOrder || 0) - (b.displayOrder || 0);
+      }
+      const timeA = a.createdAt ? (a.createdAt.toMillis ? a.createdAt.toMillis() : new Date(a.createdAt).getTime()) : 0;
+      const timeB = b.createdAt ? (b.createdAt.toMillis ? b.createdAt.toMillis() : new Date(b.createdAt).getTime()) : 0;
+      return timeB - timeA;
+    });
+
     res.json(projects);
   } catch (error) {
     next(error);
@@ -31,8 +64,13 @@ const getAdminProjects = async (req, res, next) => {
 // @access  Public
 const getProjectBySlug = async (req, res, next) => {
   try {
-    const project = await Project.findOne({ slug: req.params.slug });
-    if (project) {
+    const snapshot = await db.collection('projects').where('slug', '==', req.params.slug).limit(1).get();
+    
+    if (!snapshot.empty) {
+      let project = null;
+      snapshot.forEach(doc => {
+        project = formatDoc(doc);
+      });
       res.json(project);
     } else {
       res.status(404);
@@ -48,9 +86,16 @@ const getProjectBySlug = async (req, res, next) => {
 // @access  Private
 const createProject = async (req, res, next) => {
   try {
-    const project = new Project(req.body);
-    const createdProject = await project.save();
-    res.status(201).json(createdProject);
+    const newProject = {
+      ...req.body,
+      createdAt: FieldValue.serverTimestamp(),
+      updatedAt: FieldValue.serverTimestamp()
+    };
+    
+    const docRef = await db.collection('projects').add(newProject);
+    const doc = await docRef.get();
+    
+    res.status(201).json(formatDoc(doc));
   } catch (error) {
     next(error);
   }
@@ -61,11 +106,20 @@ const createProject = async (req, res, next) => {
 // @access  Private
 const updateProject = async (req, res, next) => {
   try {
-    const project = await Project.findById(req.params.id);
-    if (project) {
-      Object.assign(project, req.body);
-      const updatedProject = await project.save();
-      res.json(updatedProject);
+    const docRef = db.collection('projects').doc(req.params.id);
+    const doc = await docRef.get();
+    
+    if (doc.exists) {
+      const updates = {
+        ...req.body,
+        updatedAt: FieldValue.serverTimestamp()
+      };
+      // Remove _id if it's in the body to avoid saving it in the document
+      delete updates._id;
+      
+      await docRef.update(updates);
+      const updatedDoc = await docRef.get();
+      res.json(formatDoc(updatedDoc));
     } else {
       res.status(404);
       throw new Error('Project not found');
@@ -80,9 +134,11 @@ const updateProject = async (req, res, next) => {
 // @access  Private
 const deleteProject = async (req, res, next) => {
   try {
-    const project = await Project.findById(req.params.id);
-    if (project) {
-      await project.deleteOne();
+    const docRef = db.collection('projects').doc(req.params.id);
+    const doc = await docRef.get();
+    
+    if (doc.exists) {
+      await docRef.delete();
       res.json({ message: 'Project removed' });
     } else {
       res.status(404);

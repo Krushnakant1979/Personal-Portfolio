@@ -1,4 +1,4 @@
-const Profile = require('../models/Profile');
+const { db } = require('../config/db');
 
 /**
  * Rewrites Cloudinary PDF URLs to include the fl_attachment flag,
@@ -11,16 +11,22 @@ const formatResumeUrl = (url) => {
   return url;
 };
 
+// Helper to format Firestore docs
+const formatDoc = (doc) => ({ _id: doc.id, ...doc.data() });
+
 // @desc    Get profile data
 // @route   GET /api/profile
 // @access  Public
 const getProfile = async (req, res) => {
   try {
-    let profile = await Profile.findOne();
+    const docRef = db.collection('profile').doc('main_profile');
+    const doc = await docRef.get();
 
-    // If no profile exists, create a default one
-    if (!profile) {
-      profile = await Profile.create({
+    let profileData = {};
+
+    if (!doc.exists) {
+      // If no profile exists, create a default one
+      profileData = {
         email: 'krushnakantrutele1979@gmail.com',
         phone: '+91 8530604630',
         github: 'https://github.com/krushnakantrutele',
@@ -28,10 +34,13 @@ const getProfile = async (req, res) => {
         instagram: '',
         resume: '',
         about: '',
-      });
+      };
+      await docRef.set(profileData);
+      profileData._id = 'main_profile';
+    } else {
+      profileData = formatDoc(doc);
     }
 
-    const profileData = profile.toJSON();
     profileData.resume = formatResumeUrl(profileData.resume);
     res.json(profileData);
   } catch (error) {
@@ -47,16 +56,22 @@ const updateProfile = async (req, res) => {
   try {
     const { email, phone, github, linkedin, instagram, resume, about } = req.body;
 
-    // Use findOneAndUpdate for a single round-trip instead of fetch → mutate → save
-    const updated = await Profile.findOneAndUpdate(
-      {},
-      { $set: { email, phone, github, linkedin, instagram, resume, about } },
-      { new: true, upsert: true, runValidators: true }
-    );
+    const docRef = db.collection('profile').doc('main_profile');
+    const updateData = { email, phone, github, linkedin, instagram, resume, about };
+    
+    // Remove undefined values to avoid overwriting with null unintentionally, though set(merge:true) handles it
+    Object.keys(updateData).forEach(key => {
+      if (updateData[key] === undefined) {
+        delete updateData[key];
+      }
+    });
 
-    const profileData = updated.toJSON();
+    await docRef.set(updateData, { merge: true });
+    
+    const updatedDoc = await docRef.get();
+    const profileData = formatDoc(updatedDoc);
+    
     profileData.resume = formatResumeUrl(profileData.resume);
-
     res.json(profileData);
   } catch (error) {
     console.error(error);

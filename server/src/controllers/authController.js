@@ -1,13 +1,18 @@
-const Admin = require('../models/Admin');
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcrypt');
 const crypto = require('crypto');
+const { db } = require('../config/db');
 const sendEmail = require('../utils/sendEmail');
 
 const generateToken = (id) => {
   return jwt.sign({ id }, process.env.JWT_SECRET, {
     expiresIn: '30d',
   });
+};
+
+// Helper function to compare password since we don't have mongoose methods
+const comparePassword = async (enteredPassword, passwordHash) => {
+  return await bcrypt.compare(enteredPassword, passwordHash);
 };
 
 // @desc    Auth user & get token
@@ -17,10 +22,23 @@ const authAdmin = async (req, res, next) => {
   try {
     const { email, password } = req.body;
 
-    const admin = await Admin.findOne({ email });
+    const adminsRef = db.collection('admins');
+    const snapshot = await adminsRef.where('email', '==', email).limit(1).get();
 
-    if (admin && (await admin.comparePassword(password))) {
-      const token = generateToken(admin._id);
+    if (snapshot.empty) {
+      res.status(401);
+      throw new Error('Invalid email or password');
+    }
+
+    let adminDoc = null;
+    let adminData = null;
+    snapshot.forEach(doc => {
+      adminDoc = doc;
+      adminData = doc.data();
+    });
+
+    if (adminData && (await comparePassword(password, adminData.passwordHash))) {
+      const token = generateToken(adminDoc.id);
       
       // Set JWT as HTTP-only cookie
       res.cookie('token', token, {
@@ -31,9 +49,9 @@ const authAdmin = async (req, res, next) => {
       });
 
       res.json({
-        _id: admin._id,
-        name: admin.name,
-        email: admin.email,
+        _id: adminDoc.id,
+        name: adminData.name,
+        email: adminData.email,
         token: token // Returning for potential client-side fallback, but cookie is preferred
       });
     } else {
@@ -61,13 +79,14 @@ const logoutAdmin = (req, res) => {
 // @access  Private
 const getAdminProfile = async (req, res, next) => {
   try {
-    const admin = await Admin.findById(req.admin._id);
+    const adminDoc = await db.collection('admins').doc(req.admin._id).get();
 
-    if (admin) {
+    if (adminDoc.exists) {
+      const adminData = adminDoc.data();
       res.json({
-        _id: admin._id,
-        name: admin.name,
-        email: admin.email,
+        _id: adminDoc.id,
+        name: adminData.name,
+        email: adminData.email,
       });
     } else {
       res.status(404);
@@ -83,17 +102,33 @@ const getAdminProfile = async (req, res, next) => {
 // @access  Public
 const forgotPassword = async (req, res, next) => {
   try {
-    const admin = await Admin.findOne({ email: req.body.email });
+    const adminsRef = db.collection('admins');
+    const snapshot = await adminsRef.where('email', '==', req.body.email).limit(1).get();
 
-    if (!admin) {
+    if (snapshot.empty) {
       res.status(404);
       throw new Error('There is no user with that email');
     }
 
-    // Get reset token
-    const resetToken = admin.getResetPasswordToken();
+    let adminDoc = null;
+    let adminData = null;
+    snapshot.forEach(doc => {
+      adminDoc = doc;
+      adminData = doc.data();
+    });
 
-    await admin.save({ validateBeforeSave: false });
+    // Generate reset token
+    const resetToken = crypto.randomBytes(20).toString('hex');
+    const resetPasswordToken = crypto
+      .createHash('sha256')
+      .update(resetToken)
+      .digest('hex');
+    const resetPasswordExpire = Date.now() + 10 * 60 * 1000; // 10 mins
+
+    await adminDoc.ref.update({
+      resetPasswordToken,
+      resetPasswordExpire
+    });
 
     // Create reset url
     const resetUrl = `${process.env.CLIENT_URL || 'http://localhost:3000'}/admin/reset-password/${resetToken}`;
@@ -102,7 +137,7 @@ const forgotPassword = async (req, res, next) => {
 
     try {
       await sendEmail({
-        email: admin.email,
+        email: adminData.email,
         subject: 'Password reset token',
         message,
       });
@@ -110,10 +145,10 @@ const forgotPassword = async (req, res, next) => {
       res.status(200).json({ success: true, data: 'Email sent' });
     } catch (err) {
       console.log(err);
-      admin.resetPasswordToken = undefined;
-      admin.resetPasswordExpire = undefined;
-
-      await admin.save({ validateBeforeSave: false });
+      await adminDoc.ref.update({
+        resetPasswordToken: null,
+        resetPasswordExpire: null
+      });
 
       res.status(500);
       throw new Error('Email could not be sent');
@@ -134,23 +169,31 @@ const resetPassword = async (req, res, next) => {
       .update(req.params.resettoken)
       .digest('hex');
 
-    const admin = await Admin.findOne({
-      resetPasswordToken,
-      resetPasswordExpire: { $gt: Date.now() },
-    });
+    const adminsRef = db.collection('admins');
+    const snapshot = await adminsRef
+      .where('resetPasswordToken', '==', resetPasswordToken)
+      .where('resetPasswordExpire', '>', Date.now())
+      .limit(1)
+      .get();
 
-    if (!admin) {
+    if (snapshot.empty) {
       res.status(400);
       throw new Error('Invalid token');
     }
 
-    // Set new password (we hash it here because schema might not have pre-save hook for password in this codebase based on what I saw)
-    const salt = await bcrypt.genSalt(10);
-    admin.passwordHash = await bcrypt.hash(req.body.password, salt);
+    let adminDoc = null;
+    snapshot.forEach(doc => {
+      adminDoc = doc;
+    });
 
-    admin.resetPasswordToken = undefined;
-    admin.resetPasswordExpire = undefined;
-    await admin.save();
+    const salt = await bcrypt.genSalt(10);
+    const passwordHash = await bcrypt.hash(req.body.password, salt);
+
+    await adminDoc.ref.update({
+      passwordHash,
+      resetPasswordToken: null,
+      resetPasswordExpire: null
+    });
 
     res.status(200).json({
       success: true,
@@ -168,17 +211,17 @@ const updatePassword = async (req, res, next) => {
   try {
     const { currentPassword, newPassword } = req.body;
 
-    // We need to fetch the admin by ID and explicitly select the passwordHash if it wasn't already included
-    // Wait, Admin.findById gets everything by default in this schema since passwordHash doesn't have select: false
-    const admin = await Admin.findById(req.admin._id);
+    const adminDoc = await db.collection('admins').doc(req.admin._id).get();
 
-    if (!admin) {
+    if (!adminDoc.exists) {
       res.status(404);
       throw new Error('Admin not found');
     }
 
+    const adminData = adminDoc.data();
+
     // Check if current password is correct
-    const isMatch = await admin.comparePassword(currentPassword);
+    const isMatch = await comparePassword(currentPassword, adminData.passwordHash);
     if (!isMatch) {
       res.status(400);
       throw new Error('Current password is incorrect');
@@ -186,9 +229,11 @@ const updatePassword = async (req, res, next) => {
 
     // Hash and set new password
     const salt = await bcrypt.genSalt(10);
-    admin.passwordHash = await bcrypt.hash(newPassword, salt);
+    const passwordHash = await bcrypt.hash(newPassword, salt);
 
-    await admin.save();
+    await adminDoc.ref.update({
+      passwordHash
+    });
 
     res.status(200).json({
       success: true,
