@@ -57,12 +57,12 @@ const HeroSection = ({ initialProfile = null }) => {
         {/* Background animated gradient orbs */}
         <motion.div
           className="absolute top-1/4 left-1/4 w-96 h-96 bg-primary/5 rounded-full blur-3xl pointer-events-none"
-          animate={{ scale: [1, 1.2, 1], opacity: [0.3, 0.6, 0.3] }}
+          animate={{ opacity: [0.3, 0.5, 0.3] }}
           transition={{ duration: 6, repeat: Infinity, ease: 'easeInOut' }}
         />
         <motion.div
           className="absolute bottom-1/4 right-1/4 w-80 h-80 bg-cyan-500/5 rounded-full blur-3xl pointer-events-none"
-          animate={{ scale: [1.2, 1, 1.2], opacity: [0.2, 0.5, 0.2] }}
+          animate={{ opacity: [0.2, 0.4, 0.2] }}
           transition={{ duration: 8, repeat: Infinity, ease: 'easeInOut', delay: 1 }}
         />
 
@@ -205,8 +205,8 @@ const HeroSection = ({ initialProfile = null }) => {
                <div className="absolute top-0 left-16 hidden md:block">
                   <motion.div
                     className="relative w-[70px] h-[70px] rounded-full border-2 border-cyan-400 shadow-[0_0_15px_rgba(34,211,238,0.2)]"
-                    animate={{ boxShadow: ['0 0 15px rgba(34,211,238,0.2)', '0 0 30px rgba(34,211,238,0.4)', '0 0 15px rgba(34,211,238,0.2)'] }}
-                    transition={{ duration: 2.5, repeat: Infinity }}
+                    animate={{ opacity: [0.7, 1, 0.7] }}
+                    transition={{ duration: 3, repeat: Infinity }}
                   >
                      <div className="absolute -top-1 -right-2 w-[22px] h-[22px] rounded-full border-2 border-primary bg-[#050505]" />
                   </motion.div>
@@ -270,8 +270,6 @@ const HeroSection = ({ initialProfile = null }) => {
                    className="w-14 h-14 bg-white rounded-2xl flex items-center justify-center relative shadow-[0_0_25px_rgba(255,255,255,0.15)]"
                    whileHover={{ scale: 1.1 }}
                    whileTap={{ scale: 0.95 }}
-                   animate={{ boxShadow: ['0 0 25px rgba(255,255,255,0.15)', '0 0 40px rgba(255,255,255,0.25)', '0 0 25px rgba(255,255,255,0.15)'] }}
-                   transition={{ duration: 2, repeat: Infinity }}
                  >
                     <MessageSquare size={24} className="text-[#050505]" />
                     <motion.div

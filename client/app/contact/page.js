@@ -9,7 +9,7 @@ export default async function Contact() {
   let profile = null;
 
   try {
-    const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/profile`, { cache: 'no-store' });
+    const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/profile`, { next: { revalidate: 30 } });
     if (res.ok) {
       profile = await res.json();
     }

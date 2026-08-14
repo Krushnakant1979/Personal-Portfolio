@@ -9,7 +9,7 @@ export default async function ProjectsPage() {
   let projects = [];
   try {
     const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/projects`, {
-      cache: 'no-store' // We want fresh data, or we can use next: { revalidate: 60 }
+      next: { revalidate: 30 } // We want fresh data, or we can use next: { revalidate: 60 }
     });
     if (res.ok) {
       projects = await res.json();

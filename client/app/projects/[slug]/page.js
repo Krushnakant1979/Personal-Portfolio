@@ -5,7 +5,7 @@ export async function generateMetadata({ params }) {
   let project = null;
 
   try {
-    const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/projects/${slug}`, { cache: 'no-store' });
+    const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/projects/${slug}`, { next: { revalidate: 30 } });
     if (res.ok) {
       project = await res.json();
     }
@@ -30,7 +30,7 @@ export default async function ProjectDetail({ params }) {
   let project = null;
 
   try {
-    const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/projects/${slug}`, { cache: 'no-store' });
+    const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/projects/${slug}`, { next: { revalidate: 30 } });
     if (res.ok) {
       project = await res.json();
     }

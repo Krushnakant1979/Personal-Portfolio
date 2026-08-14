@@ -9,7 +9,7 @@ export default async function ExperiencePage() {
   let experiences = [];
   try {
     const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/experience`, {
-      cache: 'no-store'
+      next: { revalidate: 30 }
     });
     if (res.ok) {
       experiences = await res.json();

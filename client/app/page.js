@@ -12,9 +12,9 @@ export default async function Home() {
     
     // Fetch all required data for the homepage in parallel
     const [profileRes, projectsRes, skillsRes] = await Promise.all([
-      fetch(`${baseUrl}/api/profile`, { cache: 'no-store' }),
-      fetch(`${baseUrl}/api/projects`, { cache: 'no-store' }),
-      fetch(`${baseUrl}/api/skills`, { cache: 'no-store' })
+      fetch(`${baseUrl}/api/profile`, { next: { revalidate: 30 } }),
+      fetch(`${baseUrl}/api/projects`, { next: { revalidate: 30 } }),
+      fetch(`${baseUrl}/api/skills`, { next: { revalidate: 30 } })
     ]);
 
     if (profileRes.ok) profile = await profileRes.json();
