@@ -23,27 +23,9 @@ const iconVariants = {
   show: { scale: 1, rotate: 0, transition: { type: 'spring', stiffness: 260, damping: 20 } }
 };
 
-const SkillsHighlight = () => {
-  const [skillCategories, setSkillCategories] = useState([]);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    const fetchSkills = async () => {
-      try {
-        const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/skills`);
-        if (res.ok) {
-          const data = await res.json();
-          setSkillCategories(data);
-        }
-      } catch (err) {
-        console.error('Failed to fetch skills:', err);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchSkills();
-  }, []);
+const SkillsHighlight = ({ initialSkills = [] }) => {
+  const skillCategories = initialSkills;
+  const loading = false;
 
   return (
     <section className="py-24 relative bg-black/20">

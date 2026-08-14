@@ -29,7 +29,9 @@ const projectSchema = new mongoose.Schema({
   },
   coverImage: {
     type: String,
-    required: true,
+    required: function() {
+      return this.status === 'published';
+    },
   },
   screenshots: [{
     type: String,

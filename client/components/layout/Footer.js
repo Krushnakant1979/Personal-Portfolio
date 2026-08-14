@@ -1,27 +1,19 @@
-'use client';
-import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { Mail } from 'lucide-react';
 import { FaGithub, FaLinkedin } from 'react-icons/fa';
 
-const Footer = () => {
+const Footer = async () => {
   const currentYear = new Date().getFullYear();
-  const [profile, setProfile] = useState(null);
+  let profile = null;
 
-  useEffect(() => {
-    const fetchProfile = async () => {
-      try {
-        const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/profile`);
-        if (res.ok) {
-          const data = await res.json();
-          setProfile(data);
-        }
-      } catch (err) {
-        console.error('Failed to fetch profile:', err);
-      }
-    };
-    fetchProfile();
-  }, []);
+  try {
+    const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/profile`, { cache: 'no-store' });
+    if (res.ok) {
+      profile = await res.json();
+    }
+  } catch (err) {
+    console.error('Failed to fetch profile in Footer:', err);
+  }
 
   return (
     <footer className="border-t border-white/10 mt-20">

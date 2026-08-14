@@ -7,23 +7,8 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { FaGithub, FaLinkedin, FaInstagram } from 'react-icons/fa';
 
-const HeroSection = () => {
-  const [profile, setProfile] = useState(null);
-
-  useEffect(() => {
-    const fetchProfile = async () => {
-      try {
-        const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/profile`);
-        if (res.ok) {
-          const data = await res.json();
-          setProfile(data);
-        }
-      } catch (err) {
-        console.error('Failed to fetch profile:', err);
-      }
-    };
-    fetchProfile();
-  }, []);
+const HeroSection = ({ initialProfile = null }) => {
+  const profile = initialProfile;
 
   return (
     <section className="relative min-h-screen flex items-center overflow-hidden bg-[#050505] -mt-16 sm:-mt-20 pt-16 sm:pt-20">

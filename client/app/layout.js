@@ -1,4 +1,4 @@
-import { Geist, Geist_Mono } from "next/font/google";
+import { Geist } from "next/font/google";
 import "./globals.css";
 import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
@@ -7,11 +7,7 @@ import { ToastProvider } from "@/components/ui/Toast";
 const geistSans = Geist({
   variable: "--font-geist-sans",
   subsets: ["latin"],
-});
-
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
+  display: "swap",
 });
 
 export const metadata = {
@@ -22,11 +18,11 @@ export const metadata = {
   openGraph: {
     title: "Krushnakant Rutele | Full-Stack & App Developer",
     description: "Explore my projects, skills, and experience in web and mobile app development.",
-    url: "https://krushnakant-portfolio.com", // Placeholder
+    url: "https://krushnakant1979.vercel.app",
     siteName: "Krushnakant Rutele Portfolio",
     images: [
       {
-        url: "/og-image.jpg", // Placeholder
+        url: "/og-image.jpg",
         width: 1200,
         height: 630,
       },
@@ -46,7 +42,7 @@ export default function RootLayout({ children }) {
   return (
     <html lang="en">
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased min-h-screen flex flex-col bg-background text-foreground`}
+        className={`${geistSans.variable} antialiased min-h-screen flex flex-col bg-background text-foreground`}
       >
         <ToastProvider>
           <Header />

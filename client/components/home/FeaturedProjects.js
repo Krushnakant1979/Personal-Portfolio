@@ -8,29 +8,9 @@ import { ArrowRight, ExternalLink } from 'lucide-react';
 import { FaGithub } from 'react-icons/fa';
 import { useState, useEffect } from 'react';
 
-const FeaturedProjects = () => {
-  const [projects, setProjects] = useState([]);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    // We will fetch from API later, for now we will just use a hardcoded mock or handle empty state.
-    const fetchProjects = async () => {
-      try {
-        const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/projects`);
-        if (res.ok) {
-          const data = await res.json();
-          setProjects(data.filter(p => p.featured).slice(0, 3));
-        } else {
-          console.error("Server returned an error:", res.status);
-        }
-      } catch (err) {
-        console.error("Failed to fetch projects");
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchProjects();
-  }, []);
+const FeaturedProjects = ({ initialProjects = [] }) => {
+  const projects = initialProjects;
+  const loading = false;
 
   return (
     <section className="py-24 relative">
@@ -81,7 +61,9 @@ const FeaturedProjects = () => {
                   <Image 
                     src={project.coverImage || '/placeholder.png'} 
                     alt={project.title} 
-                    fill 
+                    fill
+                    sizes="(max-width: 768px) 100vw, (max-width: 1280px) 50vw, 33vw"
+                    priority={true}
                     className="object-cover transform group-hover:scale-105 transition-transform duration-500" 
                   />
                 </div>

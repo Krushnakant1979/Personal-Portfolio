@@ -5,10 +5,13 @@ import { PlusCircle, Edit2, Trash2 } from 'lucide-react';
 import { getIconComponent } from '@/components/ui/IconMap';
 import Button from '@/components/ui/Button';
 import SkillForm from './SkillForm';
+import ConfirmModal from '@/components/ui/ConfirmModal';
 
 const ManageSkills = ({ token }) => {
   const [skills, setSkills] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [deleteModalOpen, setDeleteModalOpen] = useState(false);
+  const [skillToDelete, setSkillToDelete] = useState(null);
   
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -35,23 +38,29 @@ const ManageSkills = ({ token }) => {
         setSkills(data);
       }
     } catch (err) {
-      console.error('Failed to fetch skills', err);
+      if (err.name !== 'AbortError') console.error('Failed to fetch skills', err);
     } finally {
       setLoading(false);
     }
   };
 
   useEffect(() => {
+    const controller = new AbortController();
     fetchSkills();
+    return () => controller.abort();
   }, []);
 
-  const handleDelete = async (id, title) => {
-    if (!window.confirm(`Are you sure you want to delete the "${title}" category? This cannot be undone.`)) {
-      return;
-    }
+  const requestDelete = (category) => {
+    setSkillToDelete(category);
+    setDeleteModalOpen(true);
+  };
+
+  const confirmDelete = async () => {
+    if (!skillToDelete) return;
+    const { _id, title } = skillToDelete;
 
     try {
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/skills/${id}`, {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/skills/${_id}`, {
         method: 'DELETE',
         headers: {
           'Authorization': `Bearer ${token}`
@@ -59,7 +68,7 @@ const ManageSkills = ({ token }) => {
       });
 
       if (res.ok) {
-        setSkills(skills.filter(s => s._id !== id));
+        setSkills(skills.filter(s => s._id !== _id));
       } else {
         alert('Failed to delete skill category');
       }
@@ -67,6 +76,7 @@ const ManageSkills = ({ token }) => {
       console.error(err);
       alert('Error deleting skill category');
     }
+    setSkillToDelete(null);
   };
 
   if (view === 'add') {
@@ -120,7 +130,7 @@ const ManageSkills = ({ token }) => {
                       <Edit2 size={14} />
                     </button>
                     <button 
-                      onClick={() => handleDelete(category._id, category.title)}
+                      onClick={() => requestDelete(category)}
                       className="p-1.5 text-gray-400 hover:text-red-400 bg-black/40 hover:bg-red-500/10 rounded-md transition-colors"
                       title="Delete"
                     >
@@ -150,6 +160,16 @@ const ManageSkills = ({ token }) => {
           </div>
         )}
       </div>
+
+      <ConfirmModal
+        isOpen={deleteModalOpen}
+        onClose={() => setDeleteModalOpen(false)}
+        onConfirm={confirmDelete}
+        title="Delete Skill Category"
+        message={`Are you sure you want to delete the "${skillToDelete?.title}" category? This cannot be undone.`}
+        confirmText="Delete Category"
+        type="danger"
+      />
     </div>
   );
 };

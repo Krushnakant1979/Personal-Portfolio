@@ -2,7 +2,7 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import Button from '../ui/Button';
-import { Save, User, Mail, Phone, FileText, Upload } from 'lucide-react';
+import { Save, User, Mail, Phone, FileText, Upload, Lock, Key } from 'lucide-react';
 import { FaGithub, FaLinkedin, FaInstagram } from 'react-icons/fa';
 import { useToast } from '../ui/Toast';
 
@@ -19,16 +19,28 @@ export default function ManageProfile() {
   const [uploadingResume, setUploadingResume] = useState(false);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [passwords, setPasswords] = useState({
+    currentPassword: '',
+    newPassword: '',
+    confirmPassword: ''
+  });
+  const [updatingPassword, setUpdatingPassword] = useState(false);
   const { addToast } = useToast();
 
-  useEffect(() => {
-    fetchProfile();
-  }, []);
+  // Shared helper — reads auth token from localStorage once
+  const getToken = () => {
+    try {
+      const adminInfo = localStorage.getItem('adminInfo');
+      return adminInfo ? JSON.parse(adminInfo).token : '';
+    } catch {
+      return '';
+    }
+  };
 
-  const fetchProfile = async () => {
+  const fetchProfile = async (signal) => {
     try {
       setLoading(true);
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/profile`);
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/profile`, { signal });
       if (res.ok) {
         const data = await res.json();
         if (data) {
@@ -44,16 +56,72 @@ export default function ManageProfile() {
         }
       }
     } catch (error) {
-      console.error('Failed to fetch profile:', error);
-      addToast('Failed to load profile data', 'error');
+      if (error.name !== 'AbortError') {
+        console.error('Failed to fetch profile:', error);
+        addToast('Failed to load profile data', 'error');
+      }
     } finally {
       setLoading(false);
     }
   };
 
+  useEffect(() => {
+    const controller = new AbortController();
+    fetchProfile(controller.signal);
+    return () => controller.abort();
+  }, []);
+
   const handleChange = (e) => {
     const { name, value } = e.target;
     setProfile((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const handlePasswordChange = (e) => {
+    const { name, value } = e.target;
+    setPasswords((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const handlePasswordSubmit = async (e) => {
+    e.preventDefault();
+    if (updatingPassword) return;
+
+    if (passwords.newPassword !== passwords.confirmPassword) {
+      addToast('New passwords do not match', 'error');
+      return;
+    }
+
+    if (passwords.newPassword.length < 6) {
+      addToast('New password must be at least 6 characters', 'error');
+      return;
+    }
+
+    setUpdatingPassword(true);
+    try {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/auth/updatepassword`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${getToken()}`
+        },
+        body: JSON.stringify({
+          currentPassword: passwords.currentPassword,
+          newPassword: passwords.newPassword
+        })
+      });
+
+      const data = await res.json();
+      if (!res.ok) {
+        addToast(data.message || 'Failed to update password', 'error');
+      } else {
+        addToast('Password updated successfully!', 'success');
+        setPasswords({ currentPassword: '', newPassword: '', confirmPassword: '' });
+      }
+    } catch (error) {
+      console.error('Error updating password:', error);
+      addToast('An error occurred while updating password', 'error');
+    } finally {
+      setUpdatingPassword(false);
+    }
   };
 
   const handleResumeUpload = async (e) => {
@@ -70,13 +138,9 @@ export default function ManageProfile() {
     formData.append('image', file); // API expects 'image' as field name for multer
 
     try {
-      const adminInfo = localStorage.getItem('adminInfo');
-      const token = adminInfo ? JSON.parse(adminInfo).token : '';
       const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/upload/resume`, {
         method: 'POST',
-        headers: {
-          Authorization: `Bearer ${token}`
-        },
+        headers: { Authorization: `Bearer ${getToken()}` },
         body: formData
       });
 
@@ -101,19 +165,19 @@ export default function ManageProfile() {
     setSaving(true);
     
     try {
-      const adminInfo = localStorage.getItem('adminInfo');
-      const token = adminInfo ? JSON.parse(adminInfo).token : '';
       const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/profile`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`
+          Authorization: `Bearer ${getToken()}`
         },
         body: JSON.stringify(profile)
       });
       
       if (!res.ok) {
         addToast('Failed to update profile', 'error');
+      } else {
+        addToast('Profile saved successfully!', 'success');
       }
     } catch (error) {
       console.error('Error saving profile:', error);
@@ -271,23 +335,106 @@ export default function ManageProfile() {
         </div>
 
         <div className="pt-4 mt-6 border-t border-white/10 flex justify-end">
-          <Button 
-            type="submit" 
-            variant="primary" 
+          <button
+            type="submit"
             disabled={saving}
-            className="flex items-center"
+            style={{ width: '160px' }}
+            className="h-11 rounded-lg font-medium text-sm text-white bg-primary hover:bg-primary-dark shadow-[0_4px_20px_rgba(255,77,77,0.3)] transition-colors duration-200 flex items-center justify-center gap-2 disabled:pointer-events-none disabled:opacity-70"
           >
             {saving ? (
-              <span className="flex items-center">
-                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                Saving...
-              </span>
+              <>
+                <svg className="animate-spin h-4 w-4 shrink-0" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+                </svg>
+                <span>Saving...</span>
+              </>
             ) : (
-              <span className="flex items-center">
-                <Save size={18} className="mr-2" /> Save Profile
-              </span>
+              <>
+                <Save size={16} className="shrink-0" />
+                <span>Save Profile</span>
+              </>
             )}
-          </Button>
+          </button>
+        </div>
+      </form>
+
+      {/* Security Settings (Change Password) */}
+      <form onSubmit={handlePasswordSubmit} className="glass p-6 rounded-2xl space-y-6 mt-8">
+        <h3 className="text-lg font-semibold text-white border-b border-white/10 pb-2 flex items-center">
+          <Lock size={18} className="mr-2 text-primary" /> Security Settings
+        </h3>
+        <p className="text-sm text-gray-400">Change your admin password below.</p>
+        
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div>
+            <label className="block text-sm font-medium text-gray-400 mb-2 flex items-center">
+              <Key size={16} className="mr-2" /> Current Password
+            </label>
+            <input
+              type="password"
+              name="currentPassword"
+              required
+              value={passwords.currentPassword}
+              onChange={handlePasswordChange}
+              className="w-full bg-black/20 border border-white/10 rounded-lg px-4 py-2.5 text-white focus:outline-none focus:ring-2 focus:ring-primary"
+              placeholder="••••••••"
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-400 mb-2 flex items-center">
+              <Lock size={16} className="mr-2" /> New Password
+            </label>
+            <input
+              type="password"
+              name="newPassword"
+              required
+              value={passwords.newPassword}
+              onChange={handlePasswordChange}
+              className="w-full bg-black/20 border border-white/10 rounded-lg px-4 py-2.5 text-white focus:outline-none focus:ring-2 focus:ring-primary"
+              placeholder="••••••••"
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-400 mb-2 flex items-center">
+              <Lock size={16} className="mr-2" /> Confirm New Password
+            </label>
+            <input
+              type="password"
+              name="confirmPassword"
+              required
+              value={passwords.confirmPassword}
+              onChange={handlePasswordChange}
+              className="w-full bg-black/20 border border-white/10 rounded-lg px-4 py-2.5 text-white focus:outline-none focus:ring-2 focus:ring-primary"
+              placeholder="••••••••"
+            />
+          </div>
+        </div>
+
+        <div className="pt-4 mt-6 border-t border-white/10 flex justify-end">
+          <button
+            type="submit"
+            disabled={updatingPassword}
+            style={{ width: '180px' }}
+            className="h-11 rounded-lg font-medium text-sm text-white bg-primary/20 border border-primary hover:bg-primary transition-colors duration-200 flex items-center justify-center gap-2 disabled:pointer-events-none disabled:opacity-70"
+          >
+            {updatingPassword ? (
+              <>
+                <svg className="animate-spin h-4 w-4 shrink-0" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+                </svg>
+                <span>Updating...</span>
+              </>
+            ) : (
+              <>
+                <Lock size={16} className="shrink-0" />
+                <span>Update Password</span>
+              </>
+            )}
+          </button>
         </div>
       </form>
     </motion.div>

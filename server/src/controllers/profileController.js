@@ -1,12 +1,23 @@
 const Profile = require('../models/Profile');
 
+/**
+ * Rewrites Cloudinary PDF URLs to include the fl_attachment flag,
+ * so the browser downloads instead of previewing the resume.
+ */
+const formatResumeUrl = (url) => {
+  if (url && url.endsWith('.pdf') && url.includes('cloudinary') && !url.includes('fl_attachment')) {
+    return url.replace('/upload/', '/upload/fl_attachment/');
+  }
+  return url;
+};
+
 // @desc    Get profile data
 // @route   GET /api/profile
 // @access  Public
 const getProfile = async (req, res) => {
   try {
     let profile = await Profile.findOne();
-    
+
     // If no profile exists, create a default one
     if (!profile) {
       profile = await Profile.create({
@@ -16,15 +27,12 @@ const getProfile = async (req, res) => {
         linkedin: 'https://linkedin.com/in/krushnakantrutele',
         instagram: '',
         resume: '',
-        about: ''
+        about: '',
       });
     }
-    
-    let profileData = profile.toJSON();
-    if (profileData.resume && profileData.resume.endsWith('.pdf') && profileData.resume.includes('cloudinary') && !profileData.resume.includes('fl_attachment')) {
-      profileData.resume = profileData.resume.replace('/upload/', '/upload/fl_attachment/');
-    }
-    
+
+    const profileData = profile.toJSON();
+    profileData.resume = formatResumeUrl(profileData.resume);
     res.json(profileData);
   } catch (error) {
     console.error(error);
@@ -38,49 +46,22 @@ const getProfile = async (req, res) => {
 const updateProfile = async (req, res) => {
   try {
     const { email, phone, github, linkedin, instagram, resume, about } = req.body;
-    
-    let profile = await Profile.findOne();
-    
-    if (profile) {
-      // Update existing profile
-      profile.email = email !== undefined ? email : profile.email;
-      profile.phone = phone !== undefined ? phone : profile.phone;
-      profile.github = github !== undefined ? github : profile.github;
-      profile.linkedin = linkedin !== undefined ? linkedin : profile.linkedin;
-      profile.instagram = instagram !== undefined ? instagram : profile.instagram;
-      profile.resume = resume !== undefined ? resume : profile.resume;
-      profile.about = about !== undefined ? about : profile.about;
-      
-      const updatedProfile = await profile.save();
-      let profileData = updatedProfile.toJSON();
-      if (profileData.resume && profileData.resume.endsWith('.pdf') && profileData.resume.includes('cloudinary') && !profileData.resume.includes('fl_attachment')) {
-        profileData.resume = profileData.resume.replace('/upload/', '/upload/fl_attachment/');
-      }
-      res.json(profileData);
-    } else {
-      // Create new profile if it doesn't exist
-      profile = await Profile.create({
-        email,
-        phone,
-        github,
-        linkedin,
-        instagram,
-        resume,
-        about
-      });
-      let profileData = profile.toJSON();
-      if (profileData.resume && profileData.resume.endsWith('.pdf') && profileData.resume.includes('cloudinary') && !profileData.resume.includes('fl_attachment')) {
-        profileData.resume = profileData.resume.replace('/upload/', '/upload/fl_attachment/');
-      }
-      res.status(201).json(profileData);
-    }
+
+    // Use findOneAndUpdate for a single round-trip instead of fetch → mutate → save
+    const updated = await Profile.findOneAndUpdate(
+      {},
+      { $set: { email, phone, github, linkedin, instagram, resume, about } },
+      { new: true, upsert: true, runValidators: true }
+    );
+
+    const profileData = updated.toJSON();
+    profileData.resume = formatResumeUrl(profileData.resume);
+
+    res.json(profileData);
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: 'Server Error' });
   }
 };
 
-module.exports = {
-  getProfile,
-  updateProfile
-};
+module.exports = { getProfile, updateProfile };

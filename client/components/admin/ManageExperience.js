@@ -4,12 +4,15 @@ import { motion } from 'framer-motion';
 import { Edit2, Trash2, Plus, Calendar, Briefcase, GraduationCap } from 'lucide-react';
 import Button from '@/components/ui/Button';
 import ExperienceForm from './ExperienceForm';
+import ConfirmModal from '@/components/ui/ConfirmModal';
 
 export default function ManageExperience({ token }) {
   const [experiences, setExperiences] = useState([]);
   const [loading, setLoading] = useState(true);
   const [view, setView] = useState('list'); // 'list', 'add', 'edit'
   const [selectedExperience, setSelectedExperience] = useState(null);
+  const [deleteModalOpen, setDeleteModalOpen] = useState(false);
+  const [experienceToDelete, setExperienceToDelete] = useState(null);
 
   const fetchExperiences = async () => {
     setLoading(true);
@@ -18,40 +21,47 @@ export default function ManageExperience({ token }) {
       if (res.ok) {
         const data = await res.json();
         setExperiences(data);
-      } else {
-        console.error("Server returned an error:", res.status);
       }
     } catch (err) {
-      console.error('Failed to fetch experiences:', err);
+      if (err.name !== 'AbortError') console.error('Failed to fetch experiences:', err);
     } finally {
       setLoading(false);
     }
   };
 
   useEffect(() => {
+    const controller = new AbortController();
     fetchExperiences();
+    return () => controller.abort();
   }, []);
 
-  const handleDelete = async (id) => {
-    if (window.confirm('Are you sure you want to delete this experience entry?')) {
-      try {
-        const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/experience/${id}`, {
-          method: 'DELETE',
-          headers: {
-            'Authorization': `Bearer ${token}`
-          }
-        });
+  const requestDelete = (exp) => {
+    setExperienceToDelete(exp);
+    setDeleteModalOpen(true);
+  };
 
-        if (res.ok) {
-          setExperiences(experiences.filter(exp => exp._id !== id));
-        } else {
-          alert('Failed to delete experience');
+  const confirmDelete = async () => {
+    if (!experienceToDelete) return;
+    const { _id } = experienceToDelete;
+    
+    try {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/experience/${_id}`, {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${token}`
         }
-      } catch (err) {
-        console.error('Error deleting experience:', err);
-        alert('An error occurred while deleting');
+      });
+
+      if (res.ok) {
+        setExperiences(experiences.filter(exp => exp._id !== _id));
+      } else {
+        alert('Failed to delete experience');
       }
+    } catch (err) {
+      console.error('Error deleting experience:', err);
+      alert('An error occurred while deleting');
     }
+    setExperienceToDelete(null);
   };
 
   const handleEdit = (exp) => {
@@ -148,7 +158,7 @@ export default function ManageExperience({ token }) {
                   <Edit2 size={16} />
                 </Button>
                 <Button 
-                  onClick={() => handleDelete(exp._id)} 
+                  onClick={() => requestDelete(exp)} 
                   variant="outline" 
                   className="p-2 border-red-500/30 text-red-400 hover:bg-red-500 hover:text-white hover:border-red-500 transition-colors"
                   title="Delete entry"
@@ -160,6 +170,16 @@ export default function ManageExperience({ token }) {
           ))}
         </div>
       )}
+
+      <ConfirmModal
+        isOpen={deleteModalOpen}
+        onClose={() => setDeleteModalOpen(false)}
+        onConfirm={confirmDelete}
+        title="Delete Experience"
+        message={`Are you sure you want to delete the "${experienceToDelete?.title}" experience entry? This cannot be undone.`}
+        confirmText="Delete Entry"
+        type="danger"
+      />
     </div>
   );
 }

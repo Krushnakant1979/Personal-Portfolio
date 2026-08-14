@@ -6,10 +6,13 @@ import { PlusCircle, Edit2, Trash2, Image as ImageIcon, Star, Globe, BookOpen } 
 import Button from '@/components/ui/Button';
 import ProjectForm from './ProjectForm';
 import { useToast } from '@/components/ui/Toast';
+import ConfirmModal from '@/components/ui/ConfirmModal';
 
 const ManageProjects = ({ token, onProjectsChange }) => {
   const [projects, setProjects] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [deleteModalOpen, setDeleteModalOpen] = useState(false);
+  const [projectToDelete, setProjectToDelete] = useState(null);
   const { addToast } = useToast();
 
   const router = useRouter();
@@ -39,25 +42,33 @@ const ManageProjects = ({ token, onProjectsChange }) => {
         setProjects(data);
       }
     } catch (err) {
-      console.error('Failed to fetch projects', err);
+      if (err.name !== 'AbortError') console.error('Failed to fetch projects', err);
     } finally {
       setLoading(false);
     }
   };
 
   useEffect(() => {
+    const controller = new AbortController();
     fetchProjects();
+    return () => controller.abort();
   }, []);
 
-  const handleDelete = async (id, title) => {
-    if (!window.confirm(`Are you sure you want to delete "${title}"? This cannot be undone.`)) return;
+  const requestDelete = (project) => {
+    setProjectToDelete(project);
+    setDeleteModalOpen(true);
+  };
+
+  const confirmDelete = async () => {
+    if (!projectToDelete) return;
+    const { _id, title } = projectToDelete;
     try {
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/projects/${id}`, {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/projects/${_id}`, {
         method: 'DELETE',
         headers: { 'Authorization': `Bearer ${token}` }
       });
       if (res.ok) {
-        setProjects(projects.filter(p => p._id !== id));
+        setProjects(projects.filter(p => p._id !== _id));
         addToast(`"${title}" deleted.`, 'success');
         if (onProjectsChange) onProjectsChange();
       } else {
@@ -66,6 +77,7 @@ const ManageProjects = ({ token, onProjectsChange }) => {
     } catch (err) {
       addToast('Error deleting project.', 'error');
     }
+    setProjectToDelete(null);
   };
 
   const quickUpdate = async (project, patch) => {
@@ -76,7 +88,8 @@ const ManageProjects = ({ token, onProjectsChange }) => {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${token}`
         },
-        body: JSON.stringify({ ...project, ...patch })
+        // Only send patch fields instead of the full project object
+        body: JSON.stringify(patch)
       });
       if (res.ok) {
         await fetchProjects();
@@ -225,7 +238,7 @@ const ManageProjects = ({ token, onProjectsChange }) => {
 
                   {/* Delete */}
                   <button
-                    onClick={() => handleDelete(project._id, project.title)}
+                    onClick={() => requestDelete(project)}
                     className="p-2 text-gray-400 hover:text-red-400 bg-black/20 hover:bg-red-500/10 rounded-lg transition-colors flex items-center"
                     title="Delete Project"
                   >
@@ -238,6 +251,16 @@ const ManageProjects = ({ token, onProjectsChange }) => {
           </div>
         )}
       </div>
+
+      <ConfirmModal
+        isOpen={deleteModalOpen}
+        onClose={() => setDeleteModalOpen(false)}
+        onConfirm={confirmDelete}
+        title="Delete Project"
+        message={`Are you sure you want to delete "${projectToDelete?.title}"? This action cannot be undone and will permanently remove this project from your portfolio.`}
+        confirmText="Delete Project"
+        type="danger"
+      />
     </div>
   );
 };
