@@ -1,5 +1,4 @@
 const jwt = require('jsonwebtoken');
-const Admin = require('../models/Admin');
 
 const protect = async (req, res, next) => {
   const authHeader = req.headers.authorization;
@@ -8,7 +7,13 @@ const protect = async (req, res, next) => {
     try {
       const token = authHeader.split(' ')[1];
       const decoded = jwt.verify(token, process.env.JWT_SECRET);
-      req.admin = await Admin.findById(decoded.id).select('-passwordHash');
+      
+      // Since we use .env for auth, if the token is valid, they are the admin.
+      req.admin = {
+        _id: decoded.id,
+        email: process.env.ADMIN_EMAIL
+      };
+      
       return next();
     } catch (error) {
       res.status(401);
