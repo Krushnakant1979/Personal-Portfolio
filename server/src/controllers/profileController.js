@@ -1,16 +1,5 @@
 const { db } = require('../config/db');
 
-/**
- * Rewrites Cloudinary PDF URLs to include the fl_attachment flag,
- * so the browser downloads instead of previewing the resume.
- */
-const formatResumeUrl = (url) => {
-  if (url && url.endsWith('.pdf') && url.includes('cloudinary') && !url.includes('fl_attachment')) {
-    return url.replace('/upload/', '/upload/fl_attachment/');
-  }
-  return url;
-};
-
 // Helper to format Firestore docs
 const formatDoc = (doc) => ({ _id: doc.id, ...doc.data() });
 
@@ -41,7 +30,6 @@ const getProfile = async (req, res) => {
       profileData = formatDoc(doc);
     }
 
-    profileData.resume = formatResumeUrl(profileData.resume);
     res.json(profileData);
   } catch (error) {
     console.error(error);
@@ -71,7 +59,6 @@ const updateProfile = async (req, res) => {
     const updatedDoc = await docRef.get();
     const profileData = formatDoc(updatedDoc);
     
-    profileData.resume = formatResumeUrl(profileData.resume);
     res.json(profileData);
   } catch (error) {
     console.error(error);
