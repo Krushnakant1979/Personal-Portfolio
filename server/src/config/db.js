@@ -4,9 +4,9 @@ const path = require('path');
 
 const connectDB = () => {
   try {
-    const serviceAccountPath = path.resolve(__dirname, 'firebaseServiceAccount.json');
+    const serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT);
     const app = initializeApp({
-      credential: cert(require(serviceAccountPath))
+      credential: cert(serviceAccount)
     });
     console.log('Firebase Firestore Connected Successfully');
     return getFirestore(app);
