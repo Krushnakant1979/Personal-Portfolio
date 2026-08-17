@@ -202,7 +202,7 @@ const HeroSection = ({ initialProfile = null }) => {
                />
             </div>
 
-            <div className="mt-auto md:mb-32 relative pt-0 md:pt-32 z-10">
+            <div className="mt-8 md:mt-auto md:mb-32 relative pt-0 md:pt-32 z-10 flex flex-col items-center text-center md:items-start md:text-left">
                {/* Geometric Shapes with animation */}
                <div className="absolute top-0 left-16 hidden md:block">
                   <motion.div
@@ -262,7 +262,7 @@ const HeroSection = ({ initialProfile = null }) => {
             </div>
 
             <motion.div
-              className="mt-6 md:mt-auto self-end flex items-center group cursor-pointer relative z-30 mb-2 md:mb-0"
+              className="mt-12 md:mt-auto self-center md:self-end flex items-center group cursor-pointer relative z-30 mb-8 md:mb-0"
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 1.3 }}
