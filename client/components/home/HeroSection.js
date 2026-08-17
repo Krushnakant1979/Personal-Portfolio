@@ -72,9 +72,9 @@ const HeroSection = ({ initialProfile = null }) => {
           
           {/* Left Column */}
           <div className="flex flex-col justify-center items-center text-center md:items-start md:text-left w-full md:w-1/3 z-20 md:pr-10 h-auto md:h-full mt-2 md:mt-0">
-            <div className="mt-4 flex flex-col items-center md:items-start">
+            <div className="mt-4 flex flex-col items-center md:items-start w-full text-center md:text-left">
               <motion.h2
-                className="text-3xl sm:text-4xl md:text-5xl font-bold text-white mb-2 sm:mb-3 tracking-tight"
+                className="text-3xl sm:text-4xl md:text-5xl font-bold text-white mb-2 sm:mb-3 tracking-tight w-full text-center md:text-left"
                 initial={{ opacity: 0, y: 30 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.6, delay: 0.2 }}
@@ -82,7 +82,7 @@ const HeroSection = ({ initialProfile = null }) => {
                 Hi,
               </motion.h2>
               <motion.h1
-                className="text-4xl sm:text-5xl md:text-[5.5rem] font-bold text-white tracking-tight mb-3 sm:mb-5 leading-none"
+                className="text-4xl sm:text-5xl md:text-[5.5rem] font-bold text-white tracking-tight mb-3 sm:mb-5 leading-none w-full text-center md:text-left"
                 initial={{ opacity: 0, y: 30 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.6, delay: 0.4 }}
@@ -90,7 +90,7 @@ const HeroSection = ({ initialProfile = null }) => {
                 I'm <span className="text-primary">Krushna</span>
               </motion.h1>
               <motion.h3
-                className="text-base sm:text-xl md:text-2xl text-white font-medium mb-8 sm:mb-12 tracking-wide"
+                className="text-base sm:text-xl md:text-2xl text-white font-medium mb-8 sm:mb-12 tracking-wide w-full text-center md:text-left"
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.6, delay: 0.6 }}
@@ -99,7 +99,7 @@ const HeroSection = ({ initialProfile = null }) => {
               </motion.h3>
               
               <motion.div
-                className="mb-6 sm:mb-20"
+                className="mb-6 sm:mb-20 flex justify-center md:justify-start w-full"
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.6, delay: 0.8 }}
@@ -115,7 +115,7 @@ const HeroSection = ({ initialProfile = null }) => {
 
             {/* Social Links Vertical */}
             <motion.div
-              className="flex flex-row md:flex-col items-center md:items-start justify-center md:justify-end w-full md:w-auto mt-6 md:mt-auto mb-4 md:mb-0"
+              className="flex flex-row md:flex-col items-center justify-center md:items-start md:justify-end w-full md:w-auto mt-6 md:mt-auto mb-4 md:mb-0"
               initial={{ opacity: 0, x: -20 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ duration: 0.6, delay: 1.0 }}
