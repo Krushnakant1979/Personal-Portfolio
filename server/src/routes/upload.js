@@ -6,13 +6,24 @@ const multer = require('multer');
 const cloudinary = require('../config/cloudinary');
 const { protect } = require('../middleware/auth');
 
-// Configure Multer + Cloudinary Storage for images
+// Configure Multer + Cloudinary Storage
 const cloudinaryStorage = new CloudinaryStorage({
   cloudinary,
-  params: {
-    folder: 'portfolio',
-    allowed_formats: ['jpg', 'png', 'jpeg', 'webp', 'gif', 'pdf'],
-    resource_type: 'auto',
+  params: async (req, file) => {
+    if (file.mimetype === 'application/pdf') {
+      return {
+        folder: 'portfolio',
+        resource_type: 'raw', // Must be raw for documents
+        public_id: `Krushnakant_Rutele_Resume_${Date.now()}.pdf`, // Explicitly add .pdf
+      };
+    }
+    
+    // For images
+    return {
+      folder: 'portfolio',
+      allowed_formats: ['jpg', 'png', 'jpeg', 'webp', 'gif'],
+      resource_type: 'auto',
+    };
   },
 });
 const upload = multer({ storage: cloudinaryStorage });
@@ -35,7 +46,6 @@ router.post('/resume', protect, upload.single('image'), (req, res) => {
     return res.status(400).json({ message: 'No file uploaded' });
   }
 
-  // Cloudinary returns the secure URL in req.file.path
   res.json({ url: req.file.path });
 });
 
