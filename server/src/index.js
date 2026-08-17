@@ -4,13 +4,14 @@ const cors = require('cors');
 const helmet = require('helmet');
 const morgan = require('morgan');
 const dotenv = require('dotenv');
+
+// Load env vars before everything else
+dotenv.config();
+
 const rateLimit = require('express-rate-limit');
 
 require('./config/db');
 const { errorHandler, notFound } = require('./middleware/errorHandler');
-
-// Load env vars
-dotenv.config();
 
 // Security Checks for Production
 if (process.env.NODE_ENV === 'production') {

@@ -176,11 +176,12 @@ function DashboardContent() {
     if (filter === 'all') return contacts;
     const now = new Date();
     return contacts.filter(contact => {
-      const contactDate = new Date(contact.createdAt);
+      const contactDate = new Date(contact.createdAt?._seconds ? contact.createdAt._seconds * 1000 : contact.createdAt);
       if (filter === 'today') return contactDate.toDateString() === now.toDateString();
       if (filter === 'month') {
         const thirtyDaysAgo = new Date();
         thirtyDaysAgo.setDate(now.getDate() - 30);
+        thirtyDaysAgo.setHours(0, 0, 0, 0);
         return contactDate >= thirtyDaysAgo;
       }
       return true;
@@ -365,7 +366,7 @@ function DashboardContent() {
                               <Mail size={14} className="mr-1" /> {contact.email}
                             </a>
                           </div>
-                          <div className="text-xs text-gray-500">{new Date(contact.createdAt).toLocaleDateString()}</div>
+                          <div className="text-xs text-gray-500">{new Date(contact.createdAt?._seconds ? contact.createdAt._seconds * 1000 : contact.createdAt).toLocaleDateString()}</div>
                         </div>
 
                         <div className="bg-black/20 p-4 rounded-lg mb-4 border border-white/5">

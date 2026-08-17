@@ -4,7 +4,13 @@ const path = require('path');
 
 const connectDB = () => {
   try {
-    const serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT);
+    let serviceAccount;
+    if (process.env.FIREBASE_SERVICE_ACCOUNT) {
+      serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT);
+    } else {
+      const serviceAccountPath = path.resolve(__dirname, 'firebaseServiceAccount.json');
+      serviceAccount = require(serviceAccountPath);
+    }
     const app = initializeApp({
       credential: cert(serviceAccount)
     });
