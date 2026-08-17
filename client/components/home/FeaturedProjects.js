@@ -16,13 +16,13 @@ const FeaturedProjects = ({ initialProjects = [] }) => {
     <section className="py-24 relative">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <motion.div
-          className="flex flex-col md:flex-row justify-between items-center md:items-end text-center md:text-left mb-12"
+          className="flex justify-between items-end mb-12"
           initial={{ opacity: 0, y: 30 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, margin: "-80px" }}
           transition={{ duration: 0.6 }}
         >
-          <div className="flex flex-col items-center md:items-start mb-6 md:mb-0">
+          <div>
             <h2 className="text-3xl md:text-4xl font-bold tracking-tight mb-4">
               Featured <span className="text-gradient">Projects</span>
             </h2>
