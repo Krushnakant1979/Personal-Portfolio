@@ -184,6 +184,7 @@ const HeroSection = ({ initialProfile = null }) => {
                  animate={{ rotate: 360 }} 
                  transition={{ duration: 10, repeat: Infinity, ease: "linear" }}
                  className="relative w-6 h-6"
+                 style={{ willChange: 'transform', transform: 'translateZ(0)' }}
                >
                   <div className="absolute top-1/2 left-0 w-full h-[2px] bg-primary -translate-y-1/2" />
                   <div className="absolute top-0 left-1/2 w-[2px] h-full bg-primary -translate-x-1/2" />
@@ -193,30 +194,35 @@ const HeroSection = ({ initialProfile = null }) => {
                  animate={{ rotate: -360 }} 
                  transition={{ duration: 15, repeat: Infinity, ease: "linear" }}
                  className="w-10 h-10 border-2 border-cyan-400/60 rounded-lg" 
+                 style={{ willChange: 'transform', transform: 'translateZ(0)' }}
                />
                
                <motion.div
                  className="w-3 h-3 bg-white/60 rounded-full"
                  animate={{ scale: [1, 1.5, 1], opacity: [0.6, 1, 0.6] }}
                  transition={{ duration: 2, repeat: Infinity }}
+                 style={{ willChange: 'transform, opacity', transform: 'translateZ(0)' }}
                />
             </div>
 
             <div className="mt-auto md:mb-32 relative pt-0 md:pt-32 z-10">
                {/* Geometric Shapes with animation */}
                <div className="absolute top-0 left-16 hidden md:block">
-                  <motion.div
-                    className="relative w-[70px] h-[70px] rounded-full border-2 border-cyan-400 shadow-[0_0_15px_rgba(34,211,238,0.2)]"
-                    animate={{ boxShadow: ['0 0 15px rgba(34,211,238,0.2)', '0 0 30px rgba(34,211,238,0.4)', '0 0 15px rgba(34,211,238,0.2)'] }}
-                    transition={{ duration: 2.5, repeat: Infinity }}
-                    style={{ willChange: 'box-shadow', transform: 'translateZ(0)' }}
-                  >
-                     <div className="absolute -top-1 -right-2 w-[22px] h-[22px] rounded-full border-2 border-primary bg-[#050505]" />
-                  </motion.div>
+                  <div className="relative w-[70px] h-[70px]">
+                    <motion.div
+                      className="absolute inset-0 rounded-full border-2 border-cyan-400 shadow-[0_0_30px_rgba(34,211,238,0.4)]"
+                      animate={{ opacity: [0.5, 1, 0.5] }}
+                      transition={{ duration: 2.5, repeat: Infinity }}
+                      style={{ willChange: 'opacity', transform: 'translateZ(0)' }}
+                    />
+                    <div className="absolute inset-0 rounded-full border-2 border-cyan-400" />
+                    <div className="absolute -top-1 -right-2 w-[22px] h-[22px] rounded-full border-2 border-primary bg-[#050505] z-10" />
+                  </div>
                   <motion.div
                     className="absolute top-[80px] left-[110px] w-[22px] h-[22px] rounded-full bg-cyan-400 shadow-[0_0_15px_rgba(34,211,238,0.4)]"
                     animate={{ scale: [1, 1.3, 1], opacity: [0.7, 1, 0.7] }}
                     transition={{ duration: 2, repeat: Infinity, delay: 0.5 }}
+                    style={{ willChange: 'transform, opacity', transform: 'translateZ(0)' }}
                   />
                </div>
 
@@ -270,20 +276,25 @@ const HeroSection = ({ initialProfile = null }) => {
                <Link href="/contact" className="flex items-center">
                  <span className="text-white text-sm font-semibold mr-4 hover:text-primary transition-colors">Let's Chat</span>
                    <motion.div
-                     className="w-14 h-14 bg-white rounded-2xl flex items-center justify-center relative shadow-[0_0_25px_rgba(255,255,255,0.15)]"
+                     className="w-14 h-14 bg-white rounded-2xl flex items-center justify-center relative"
                      whileHover={{ scale: 1.1 }}
                      whileTap={{ scale: 0.95 }}
-                     animate={{ boxShadow: ['0 0 25px rgba(255,255,255,0.15)', '0 0 40px rgba(255,255,255,0.25)', '0 0 25px rgba(255,255,255,0.15)'] }}
-                     transition={{ duration: 2, repeat: Infinity }}
-                     style={{ willChange: 'transform, box-shadow', transform: 'translateZ(0)' }}
+                     style={{ willChange: 'transform', transform: 'translateZ(0)' }}
                    >
-                    <MessageSquare size={24} className="text-[#050505]" />
-                    <motion.div
-                      className="absolute -top-1.5 -right-1.5 w-4 h-4 bg-[#22c55e] rounded-full border-2 border-[#050505]"
-                      animate={{ scale: [1, 1.3, 1] }}
-                      transition={{ duration: 1.5, repeat: Infinity }}
-                    />
-                 </motion.div>
+                     <motion.div 
+                       className="absolute inset-0 rounded-2xl shadow-[0_0_40px_rgba(255,255,255,0.3)] pointer-events-none"
+                       animate={{ opacity: [0.4, 1, 0.4] }}
+                       transition={{ duration: 2, repeat: Infinity }}
+                       style={{ willChange: 'opacity' }}
+                     />
+                     <MessageSquare size={24} className="text-[#050505] relative z-10" />
+                     <motion.div
+                       className="absolute -top-1.5 -right-1.5 w-4 h-4 bg-[#22c55e] rounded-full border-2 border-[#050505] z-10"
+                       animate={{ scale: [1, 1.3, 1] }}
+                       transition={{ duration: 1.5, repeat: Infinity }}
+                       style={{ willChange: 'transform' }}
+                     />
+                  </motion.div>
                </Link>
             </motion.div>
           </motion.div>
