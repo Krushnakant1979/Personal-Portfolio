@@ -8,13 +8,10 @@ const formatDoc = (doc) => ({ _id: doc.id, ...doc.data() });
 // @access  Public
 const getProjects = async (req, res, next) => {
   try {
-    const snapshot = await db.collection('projects').get();
+    const snapshot = await db.collection('projects').where('status', '!=', 'draft').get();
     let projects = [];
     snapshot.forEach(doc => {
-      const data = doc.data();
-      if (data.status !== 'draft') {
-        projects.push(formatDoc(doc));
-      }
+      projects.push(formatDoc(doc));
     });
     
     // Sort by displayOrder ascending, then createdAt descending

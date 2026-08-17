@@ -63,7 +63,6 @@ const FeaturedProjects = ({ initialProjects = [] }) => {
                     alt={project.title} 
                     fill
                     sizes="(max-width: 768px) 100vw, (max-width: 1280px) 50vw, 33vw"
-                    priority={true}
                     className="object-cover transform group-hover:scale-105 transition-transform duration-500" 
                   />
                 </div>
