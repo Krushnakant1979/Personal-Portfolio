@@ -115,7 +115,7 @@ const HeroSection = ({ initialProfile = null }) => {
 
             {/* Social Links Vertical */}
             <motion.div
-              className="flex flex-row md:flex-col items-center md:items-start justify-center md:justify-end w-full md:w-auto mt-6 md:mt-auto mb-10 md:mb-0"
+              className="flex flex-row md:flex-col items-center md:items-start justify-center md:justify-end w-full md:w-auto mt-6 md:mt-auto mb-4 md:mb-0"
               initial={{ opacity: 0, x: -20 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ duration: 0.6, delay: 1.0 }}
@@ -149,7 +149,7 @@ const HeroSection = ({ initialProfile = null }) => {
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ duration: 1, delay: 0.3 }}
-            className="relative flex justify-center items-end w-full md:w-1/3 h-auto md:h-full pointer-events-auto opacity-100 z-10 md:z-20 md:translate-x-16 lg:translate-x-24 mt-8 md:mt-0"
+            className="relative flex justify-center items-end w-full md:w-1/3 h-auto md:h-full pointer-events-auto opacity-100 z-10 md:z-20 md:translate-x-16 lg:translate-x-24 -mt-2 md:mt-0"
           >
              {/* Gradient overlays to blend the image perfectly into the black background */}
              <div className="absolute inset-x-0 bottom-0 h-1/3 bg-gradient-to-t from-[#050505] to-transparent z-10" />
@@ -202,7 +202,7 @@ const HeroSection = ({ initialProfile = null }) => {
                />
             </div>
 
-            <div className="mt-8 md:mt-auto md:mb-32 relative pt-0 md:pt-32 z-10 flex flex-col items-center text-center md:items-start md:text-left">
+            <div className="mt-auto md:mb-32 relative pt-0 md:pt-32 z-10">
                {/* Geometric Shapes with animation */}
                <div className="absolute top-0 left-16 hidden md:block">
                   <motion.div
@@ -262,7 +262,7 @@ const HeroSection = ({ initialProfile = null }) => {
             </div>
 
             <motion.div
-              className="mt-12 md:mt-auto self-center md:self-end flex items-center group cursor-pointer relative z-30 mb-8 md:mb-0"
+              className="mt-6 md:mt-auto self-end flex items-center group cursor-pointer relative z-30 mb-2 md:mb-0"
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 1.3 }}
