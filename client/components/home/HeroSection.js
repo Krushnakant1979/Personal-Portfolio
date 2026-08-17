@@ -71,7 +71,7 @@ const HeroSection = ({ initialProfile = null }) => {
         <div className="flex flex-col md:flex-row items-center justify-start md:justify-between h-full w-full min-h-[85vh] relative z-10 pb-10 pt-4 md:pt-0 gap-6 md:gap-0">
           
           {/* Left Column */}
-          <div className="flex flex-col justify-center items-center text-center md:items-start md:text-left w-full md:w-1/3 z-20 md:pr-10 h-auto md:h-full mt-2 md:mt-0">
+          <div className="flex flex-col justify-center items-center text-center md:items-start md:text-left w-full md:w-1/3 z-20 md:pr-10 h-auto md:h-full mt-2 md:mt-0 relative">
             <div className="mt-4 flex flex-col items-center md:items-start w-full text-center md:text-left">
               <motion.h2
                 className="text-3xl sm:text-4xl md:text-5xl font-bold text-white mb-2 sm:mb-3 tracking-tight w-full text-center md:text-left"
@@ -115,28 +115,28 @@ const HeroSection = ({ initialProfile = null }) => {
 
             {/* Social Links Vertical */}
             <motion.div
-              className="flex flex-row md:flex-col items-center justify-center md:items-start md:justify-end w-full md:w-auto mt-6 md:mt-auto mb-4 md:mb-0"
-              initial={{ opacity: 0, x: -20 }}
+              className="absolute right-0 top-1/2 -translate-y-1/2 md:static md:translate-y-0 flex flex-col md:flex-col items-center justify-center md:items-start md:justify-end w-auto mt-0 md:mt-auto mb-0 md:mb-0 z-50 bg-black/40 md:bg-transparent py-5 px-3 md:p-0 rounded-full md:rounded-none backdrop-blur-md md:backdrop-blur-none border border-white/10 md:border-none shadow-lg shadow-black/50 md:shadow-none"
+              initial={{ opacity: 0, x: 20 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ duration: 0.6, delay: 1.0 }}
             >
-               <div className="flex md:flex-col flex-row space-x-6 md:space-x-0 md:space-y-6">
-                 <motion.a href={profile?.github || 'https://github.com/krushnakantrutele'} target="_blank" rel="noopener noreferrer" className="text-gray-400 hover:text-white transition-colors"
-                   whileHover={{ scale: 1.2, y: -2 }} transition={{ type: 'spring', stiffness: 400 }}>
+               <div className="flex flex-col space-y-6 md:space-y-6">
+                 <motion.a href={profile?.github || 'https://github.com/krushnakantrutele'} target="_blank" rel="noopener noreferrer" className="text-gray-400 hover:text-primary transition-colors"
+                   whileHover={{ scale: 1.2, x: -2 }} transition={{ type: 'spring', stiffness: 400 }}>
                     <FaGithub size={20} />
                  </motion.a>
-                 <motion.a href={profile?.linkedin || 'https://linkedin.com/in/krushnakantrutele'} target="_blank" rel="noopener noreferrer" className="text-gray-400 hover:text-white transition-colors"
-                   whileHover={{ scale: 1.2, y: -2 }} transition={{ type: 'spring', stiffness: 400 }}>
+                 <motion.a href={profile?.linkedin || 'https://linkedin.com/in/krushnakantrutele'} target="_blank" rel="noopener noreferrer" className="text-gray-400 hover:text-primary transition-colors"
+                   whileHover={{ scale: 1.2, x: -2 }} transition={{ type: 'spring', stiffness: 400 }}>
                     <FaLinkedin size={20} />
                  </motion.a>
                  {profile?.instagram ? (
-                   <motion.a href={profile.instagram} target="_blank" rel="noopener noreferrer" className="text-gray-400 hover:text-white transition-colors"
-                     whileHover={{ scale: 1.2, y: -2 }} transition={{ type: 'spring', stiffness: 400 }}>
+                   <motion.a href={profile.instagram} target="_blank" rel="noopener noreferrer" className="text-gray-400 hover:text-primary transition-colors"
+                     whileHover={{ scale: 1.2, x: -2 }} transition={{ type: 'spring', stiffness: 400 }}>
                       <FaInstagram size={20} />
                    </motion.a>
                  ) : (
-                   <motion.a href={`mailto:${profile?.email || 'krushnakantrutele1979@gmail.com'}`} className="text-gray-400 hover:text-white transition-colors"
-                     whileHover={{ scale: 1.2, y: -2 }} transition={{ type: 'spring', stiffness: 400 }}>
+                   <motion.a href={`mailto:${profile?.email || 'krushnakantrutele1979@gmail.com'}`} className="text-gray-400 hover:text-primary transition-colors"
+                     whileHover={{ scale: 1.2, x: -2 }} transition={{ type: 'spring', stiffness: 400 }}>
                       <FaInstagram size={20} />
                    </motion.a>
                  )}
