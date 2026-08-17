@@ -71,8 +71,8 @@ const HeroSection = ({ initialProfile = null }) => {
         <div className="flex flex-col md:flex-row items-center justify-start md:justify-between h-full w-full min-h-[85vh] relative z-10 pb-10 pt-4 md:pt-0 gap-6 md:gap-0">
           
           {/* Left Column */}
-          <div className="flex flex-col justify-center w-full md:w-1/3 z-20 md:pr-10 h-auto md:h-full mt-2 md:mt-0">
-            <div className="mt-4">
+          <div className="flex flex-col justify-center items-center text-center md:items-start md:text-left w-full md:w-1/3 z-20 md:pr-10 h-auto md:h-full mt-2 md:mt-0">
+            <div className="mt-4 flex flex-col items-center md:items-start">
               <motion.h2
                 className="text-3xl sm:text-4xl md:text-5xl font-bold text-white mb-2 sm:mb-3 tracking-tight"
                 initial={{ opacity: 0, y: 30 }}
@@ -115,7 +115,7 @@ const HeroSection = ({ initialProfile = null }) => {
 
             {/* Social Links Vertical */}
             <motion.div
-              className="flex flex-row md:flex-col items-center md:items-start justify-between md:justify-end w-full md:w-auto mt-2 md:mt-auto mb-2 md:mb-0"
+              className="flex flex-row md:flex-col items-center md:items-start justify-center md:justify-end w-full md:w-auto mt-6 md:mt-auto mb-2 md:mb-0"
               initial={{ opacity: 0, x: -20 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ duration: 0.6, delay: 1.0 }}
