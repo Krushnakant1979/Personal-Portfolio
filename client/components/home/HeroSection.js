@@ -71,10 +71,10 @@ const HeroSection = ({ initialProfile = null }) => {
         <div className="flex flex-col md:flex-row items-center justify-start md:justify-between h-full w-full min-h-[85vh] relative z-10 pb-10 pt-4 md:pt-0 gap-6 md:gap-0">
           
           {/* Left Column */}
-          <div className="flex flex-col justify-center items-center text-center md:items-start md:text-left w-full md:w-1/3 z-20 md:pr-10 h-auto md:h-full mt-2 md:mt-0 relative">
-            <div className="mt-4 flex flex-col items-center md:items-start w-full text-center md:text-left">
+          <div className="flex flex-col justify-center items-start text-left w-full md:w-1/3 z-20 md:pr-10 h-auto md:h-full mt-2 md:mt-0 relative">
+            <div className="mt-4 flex flex-col items-start w-full text-left">
               <motion.h2
-                className="text-3xl sm:text-4xl md:text-5xl font-bold text-white mb-2 sm:mb-3 tracking-tight w-full text-center md:text-left"
+                className="text-3xl sm:text-4xl md:text-5xl font-bold text-white mb-2 sm:mb-3 tracking-tight w-full text-left"
                 initial={{ opacity: 0, y: 30 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.6, delay: 0.2 }}
@@ -82,7 +82,7 @@ const HeroSection = ({ initialProfile = null }) => {
                 Hi,
               </motion.h2>
               <motion.h1
-                className="text-4xl sm:text-5xl md:text-[5.5rem] font-bold text-white tracking-tight mb-3 sm:mb-5 leading-none w-full text-center md:text-left"
+                className="text-4xl sm:text-5xl md:text-[5.5rem] font-bold text-white tracking-tight mb-3 sm:mb-5 leading-none w-full text-left"
                 initial={{ opacity: 0, y: 30 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.6, delay: 0.4 }}
@@ -90,7 +90,7 @@ const HeroSection = ({ initialProfile = null }) => {
                 I'm <span className="text-primary">Krushna</span>
               </motion.h1>
               <motion.h3
-                className="text-base sm:text-xl md:text-2xl text-white font-medium mb-8 sm:mb-12 tracking-wide w-full text-center md:text-left"
+                className="text-base sm:text-xl md:text-2xl text-white font-medium mb-8 sm:mb-12 tracking-wide w-full text-left"
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.6, delay: 0.6 }}
@@ -99,7 +99,7 @@ const HeroSection = ({ initialProfile = null }) => {
               </motion.h3>
               
               <motion.div
-                className="mb-6 sm:mb-20 flex justify-center md:justify-start w-full"
+                className="mb-6 sm:mb-20 flex justify-start w-full"
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.6, delay: 0.8 }}
